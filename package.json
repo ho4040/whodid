@@ -1,0 +1,26 @@
+{
+  "name": "contribution-checker",
+  "version": "1.0.0",
+  "description": "coCLI contribution check tool from git repository",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "argv": "git+ssh://git@github.com/ho4040/argv.git"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ho4040/contribution-checker.git"
+  },
+  "keywords": [
+    "git",
+    "contribution"
+  ],
+  "author": "zero choi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ho4040/contribution-checker/issues"
+  },
+  "homepage": "https://github.com/ho4040/contribution-checker#readme"
+}
