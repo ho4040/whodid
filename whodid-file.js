@@ -1,38 +1,35 @@
 let whodid = require('./whodid.js')
 
-function add_contribution(storage, author, filename, amt){
-
-	if('statDict' in storage == false) 					storage.statDict = {}
-	if('statDictOnlyAuth' in storage == false)	storage.statDictOnlyAuth = {}
-	if('statDictOnlyFile' in storage == false) 	storage.statDictOnlyFile = {}
-
-	if(author in storage.statDict	== false) {
-		storage.statDict[author] = {}
-		storage.statDictOnlyAuth[author] = 0		
-	}
-
-	if(filename in storage.statDict[author] == false) {
-		storage.statDict[author][filename] = 0
-		storage.statDictOnlyFile[filename] = 0
-	}
-
-	storage.statDict[author][filename] += amt
-	storage.statDictOnlyAuth[author] += amt
-	storage.statDictOnlyFile[filename] += amt
-
+function add_contribution(storage, filename, amt){
+	if(filename in storage == false)
+		storage[filename] = 0
+	storage[filename] += amt
 	return storage
 }
 
-function run(dir=__dirname, since='1.month'){
-	let commits = whodid.get_commits(dir, since)
+function run(dir=__dirname, since='1.month', verbose=true, num=100){
+	let commits = whodid.get_commits(dir, since, verbose)
 	let storage = {}
 	commits.forEach(commit=>{
 		commit.modifications.forEach(mod=>{
-			add_contribution(storage, commit.author, mod.filename, mod.editAmt)
+			add_contribution(storage, mod.filename, mod.editAmt)
 		})
 	})
+	var arr = []
+	for( filename in storage ){
+		arr.push({filename:filename, weight:storage[filename]})
+	}
+	arr = arr.sort((a,b)=>{
+		return b.weight-a.weight
+	})
+	if(num > 0)
+		arr.length = num
 
-	console.log(storage.statDictOnlyFile)
+	console.log("\n")
+	console.log("Top modified files since "+since)
+	arr.forEach(info=>{
+		console.log(`  ${info.filename} ${info.weight}`)
+	})
 }
 
 module.exports = {run}

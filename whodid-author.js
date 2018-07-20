@@ -23,8 +23,8 @@ function add_contribution(storage, author, filename, amt){
 	return storage
 }
 
-function run(dir=__dirname, since='1.month'){
-	let commits = whodid.get_commits(dir, since)
+function run(dir=__dirname, since='1.month', verbose=true){
+	let commits = whodid.get_commits(dir, since, verbose)
 	let storage = {}
 	commits.forEach(commit=>{
 		commit.modifications.forEach(mod=>{
@@ -32,7 +32,9 @@ function run(dir=__dirname, since='1.month'){
 		})
 	})
 
-	console.log(storage.statDictOnlyAuth)
+	console.log("\n")
+	console.log("Contribution state since " + since)
+	console.log(JSON.stringify(storage.statDictOnlyAuth, null, 4))
 }
 
 module.exports = {run}

@@ -1,7 +1,7 @@
 {
-  "name": "contribution-checker",
-  "version": "1.0.0",
-  "description": "coCLI contribution check tool from git repository",
+  "name": "whodid",
+  "version": "1.0.1",
+  "description": "contribution check tool for git project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,18 +9,22 @@
   "dependencies": {
     "argv": "git+ssh://git@github.com/ho4040/argv.git"
   },
+  "preferGlobal": true,
+  "bin": {
+    "whodid": "index.js"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ho4040/contribution-checker.git"
+    "url": "git+https://github.com/ho4040/whodid.git"
   },
   "keywords": [
     "git",
     "contribution"
   ],
-  "author": "zero choi",
+  "author": "Zero choi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ho4040/contribution-checker/issues"
+    "url": "https://github.com/ho4040/whodid/issues"
   },
-  "homepage": "https://github.com/ho4040/contribution-checker#readme"
+  "homepage": "https://github.com/ho4040/whodid#readme"
 }
