@@ -7,7 +7,7 @@ var config = null
 
 function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, valid_threshold=1000) {
 
-	let configFilePath = dir+'/whodid.json'
+	let configFilePath = dir+'whodid.json'
 	if(fs.existsSync(configFilePath))
 	{
 		var confFile = fs.readFileSync(configFilePath, 'utf8');
@@ -15,11 +15,12 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 		config.ignore = config.ignore.map(str=>{ return RegExp(str, 'g')})
 		if(verbose)
 			console.log("config loaded from ", configFilePath)
-		//console.log("  ignore:", ignoreReList)
 	}
-	else{
+	else
+	{
 		if(verbose)
 			console.log('\x1b[31m%s\x1b[0m',"[WARN]can't find config file from ", configFilePath)
+		config = Object.assign({ignore:[], verbose:verbose})
 	}
 
 	let result = execSync(`git log --since=${since} --abbrev-commit --oneline`, {cwd:dir}).toString()

@@ -7,7 +7,7 @@ function store(storage, author, amt){
 	return storage
 }
 
-function run(commits, as_json){
+function run(commits, num, as_json){
 	
 	let storage = {}
 	commits.forEach(commit=>{ store(storage, commit.author, commit.totalWeight) })
@@ -24,11 +24,13 @@ function run(commits, as_json){
 		arr.sort((a,b)=>{
 			return b.score - a.score
 		})
+		if(num > 0)
+			arr.length = num
 		console.log("=====================================================")
-		console.log(" score\t|\tauthor")
+		console.log(" score\t| author")
 		console.log("-----------------------------------------------------")
 		arr.forEach(e=>{
-			console.log(` \x1b[33m${e.score}\x1b[0m`, "\t|\t"+e.name, )
+			console.log(` \x1b[33m${e.score}\x1b[0m`, "\t| "+e.name, )
 		})
 		console.log("=====================================================")
 	}

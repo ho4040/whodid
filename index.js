@@ -41,6 +41,11 @@ function make_extra_option(options){
 			type:"boolean",
 			description:"print as json (default:false)",
 			example:"'whodid author --as-json=true"
+		},{
+			name:"num",
+			type:"integer",
+			description:"number of result",
+			example:"'whodid heavy --since=2.month --num=10"
 		}
 	].concat(options)
 }
@@ -73,12 +78,7 @@ argv.mod({
 		"\twhodid file --path=~/someProj",
 		"\twhodid file --path=~/someProj --since=1.month"
 	].join(os.EOL),
-	options:make_extra_option([{
-			name:"num",
-			type:"integer",
-			description:"number of result",
-			example:"'whodid file --since=2.month --num=10"
-		}])
+	options:make_extra_option([])
 });
 
 argv.mod({
@@ -96,11 +96,6 @@ argv.mod({
 			type:"string",
 			description:"show only specific author",
 			example:"'whodid heavy --author='zero <zero@nooslab.com>'"
-		},{
-			name:"num",
-			type:"integer",
-			description:"number of result",
-			example:"'whodid heavy --since=2.month --num=10"
 		}])
 });
 
@@ -112,6 +107,7 @@ let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
 let include_merge = ((!!args.options['include-merge'])	? args.options['include-merge']	: false);
 let valid_threshold = ((!!args.options['valid-threshold'])	? args.options['valid-threshold']	: 1000);
 let as_json = ((!!args.options['as-json'])	? args.options['as-json']	: false);
+let num = ((!!args.options.num)	? args.options.num	: 10);
 
 if(verbose){	
 	console.log("path:", path)
@@ -119,6 +115,7 @@ if(verbose){
 	console.log("include-merge:", include_merge)
 	console.log("valid-threshold:", valid_threshold)
 	console.log("as-json:", as_json)
+	console.log("num:", num)
 }
 
 let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)
@@ -127,22 +124,16 @@ switch(args.mod) {
 
 	default:
 	case "author":
-		whodid_author.run(commits, as_json)
+		whodid_author.run(commits, num, as_json)
 	break;
 
 	case "file":
-	{
-		let num = ((!!args.options.num)	? args.options.num	: 10);
 		whodid_file.run(commits, num, as_json)
-	}
 	break;
 
 	case "heavy":
-	{
 		let author = args.options.author?args.options.author:null;
-		let num = ((!!args.options.num)	? args.options.num	: 5);
 		whodid_heavy.run(commits, num, author, as_json)
-	}
 	break;
 
 }
