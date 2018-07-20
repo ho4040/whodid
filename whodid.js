@@ -2,7 +2,7 @@
 var execSync = require('child_process').execSync
 //var tdqm = require("ntqdm")();
 
-function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, commit_drop_threshold=10000) {
+function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, commit_drop_threshold=2000) {
 
 	let result = execSync(`git log --since=${since} --abbrev-commit --oneline`, {cwd:dir}).toString()
 	let commitList = []
@@ -19,7 +19,8 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 		c.text = commit.text
 		c.totalWeight = 0
 		c.modifications.forEach( mod=>{
-				c.totalWeight += 	mod.editAmt
+				if(mod.editAmt < commit_drop_threshold)
+					c.totalWeight += 	mod.editAmt
 		})
 		if(verbose)
 			console.log(`${commit.id}\t${c.totalWeight}\t${c.author}\t${(('merge' in c) ? '\tMERGE' : '') }`)
@@ -28,8 +29,6 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 
 	if(include_merge == false)
 		newCommitList = newCommitList.filter(e=>{ return 'merge' in e == false })
-
-	newCommitList = newCommitList.filter(e=>{ return e.totalWeight < commit_drop_threshold})
 
 	// console.log("----------------------")
 	return newCommitList

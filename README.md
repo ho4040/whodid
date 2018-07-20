@@ -58,7 +58,7 @@ $ whodid author --path=<your-project-path> --since=1.month --verbose=false
 ### Default action
 
 ```bash
-$ whodid --path=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=10000
+$ whodid --path=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=2000
 ```
 is same as
 
