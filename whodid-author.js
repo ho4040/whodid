@@ -1,40 +1,20 @@
-let whodid = require('./whodid.js')
 
-function add_contribution(storage, author, filename, amt){
 
-	if('statDict' in storage == false) 					storage.statDict = {}
-	if('statDictOnlyAuth' in storage == false)	storage.statDictOnlyAuth = {}
-	if('statDictOnlyFile' in storage == false) 	storage.statDictOnlyFile = {}
-
-	if(author in storage.statDict	== false) {
-		storage.statDict[author] = {}
-		storage.statDictOnlyAuth[author] = 0		
-	}
-
-	if(filename in storage.statDict[author] == false) {
-		storage.statDict[author][filename] = 0
-		storage.statDictOnlyFile[filename] = 0
-	}
-
-	storage.statDict[author][filename] += amt
-	storage.statDictOnlyAuth[author] += amt
-	storage.statDictOnlyFile[filename] += amt
-
+function store(storage, author, amt){
+	if(author in storage == false)
+		storage[author] = 0
+	storage[author] += amt
 	return storage
 }
 
-function run(dir=__dirname, since='1.month', verbose=true){
-	let commits = whodid.get_commits(dir, since, verbose)
+function run(commits){
+	
 	let storage = {}
-	commits.forEach(commit=>{
-		commit.modifications.forEach(mod=>{
-			add_contribution(storage, commit.author, mod.filename, mod.editAmt)
-		})
-	})
+	commits.forEach(commit=>{ store(storage, commit.author, commit.totalWeight) })
 
 	console.log("\n")
-	console.log("Contribution state since " + since)
-	console.log(JSON.stringify(storage.statDictOnlyAuth, null, 4))
+	console.log("Contribution state")
+	console.log(JSON.stringify(storage, null, 4))
 }
 
 module.exports = {run}

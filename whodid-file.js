@@ -1,20 +1,20 @@
-let whodid = require('./whodid.js')
-
-function add_contribution(storage, filename, amt){
+function store(storage, filename, amt){
 	if(filename in storage == false)
 		storage[filename] = 0
 	storage[filename] += amt
 	return storage
 }
 
-function run(dir=__dirname, since='1.month', verbose=true, num=100){
-	let commits = whodid.get_commits(dir, since, verbose)
+function run(commits, num){
+	
 	let storage = {}
+
 	commits.forEach(commit=>{
 		commit.modifications.forEach(mod=>{
-			add_contribution(storage, mod.filename, mod.editAmt)
+			store(storage, mod.filename, mod.editAmt)
 		})
 	})
+
 	var arr = []
 	for( filename in storage ){
 		arr.push({filename:filename, weight:storage[filename]})
@@ -26,9 +26,9 @@ function run(dir=__dirname, since='1.month', verbose=true, num=100){
 		arr.length = num
 
 	console.log("\n")
-	console.log("Top modified files since "+since)
+	console.log("Top modified files")
 	arr.forEach(info=>{
-		console.log(`  ${info.filename} ${info.weight}`)
+		console.log(`  ${info.weight}\t${info.filename}`)
 	})
 }
 

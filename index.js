@@ -1,4 +1,5 @@
 #! /usr/bin/env node
+let whodid = require('./whodid.js')
 let whodid_author = require('./whodid-author.js')
 let whodid_file = require('./whodid-file.js')
 let whodid_heavy = require('./whodid-heavy.js')
@@ -6,7 +7,38 @@ let whodid_heavy = require('./whodid-heavy.js')
 var os = require('os');
 var argv = require( 'argv' );
 
-argv.version('v1.0.2');
+argv.version('v1.0.4');
+
+function make_extra_option(options){
+	return [
+		{
+			name:"verbose",
+			type:"boolean",
+			description:"show process or not",
+			example:"'whodid author -v=false"
+		},{
+			name:"path",
+			type:"string",
+			description:"the specification git project path. Default: '.'",
+			example:"'whodid author --path=/home/ubuntu/someProj"
+		},{
+			name:"since",
+			type:"string",
+			description:"commition date",
+			example:"'whodid author --since=2.month"
+		},{
+			name:"include-merge",
+			type:"boolean",
+			description:"specify include merge commit or not.(default: false)",
+			example:"'whodid author --include-merge=true"
+		},{
+			name:"commit-drop-threshold",
+			type:"integer",
+			description:"If number of modifed line is to big then drop commit out.(default:10000)",
+			example:"'whodid author --commit-drop-threshold=10000"
+		}
+	].concat(options)
+}
 
 argv.info([
 	"whodid",
@@ -24,27 +56,7 @@ argv.mod({
 		"\twhodid author --path=~/someProj",
 		"\twhodid author --path=~/someProj --since=1.month"
 	].join(os.EOL),
-	options:[
-		{
-			name:"verbose",
-			short:"v",
-			type:"boolean",
-			description:"show process or not",
-			example:"'whodid author -v=false"
-		},{
-			name:"path",
-			short:"p",
-			type:"string",
-			description:"the specification git project path. Default: '.'",
-			example:"'whodid author --path=/home/ubuntu/someProj"
-		},{
-			name:"since",
-			short:"s",
-			type:"string",
-			description:"commition date",
-			example:"'whodid author --since=2.month"
-		}
-	]
+	options:make_extra_option([])
 });
 
 argv.mod({
@@ -56,27 +68,12 @@ argv.mod({
 		"\twhodid file --path=~/someProj",
 		"\twhodid file --path=~/someProj --since=1.month"
 	].join(os.EOL),
-	options:[
-		{
-			name:"verbose",
-			short:"v",
-			type:"boolean",
-			description:"show process or not",
-			example:"'whodid file -v=false"
-		},{
-			name:"path",
-			short:"p",
-			type:"string",
-			description:"the specification git project path. Default: '.'",
-			example:"'whodid file --path=./"
-		},{
-			name:"since",
-			short:"s",
-			type:"string",
-			description:"commition date",
-			example:"'whodid file --since=2.month"
-		}
-	]
+	options:make_extra_option([{
+			name:"num",
+			type:"integer",
+			description:"number of result",
+			example:"'whodid file --since=2.month --num=10"
+		}])
 });
 
 argv.mod({
@@ -89,81 +86,45 @@ argv.mod({
 		"\twhodid heavy --path=~/someProj --since=1.month",
 		"\twhodid heavy --path=~/someProj --author=jeff",
 	].join(os.EOL),
-	options:[
-		{
-			name:"verbose",
-			type:"boolean",
-			description:"show process or not",
-			example:"'whodid heavy --verbose=false"
-		},{
-			name:"path",
-			type:"string",
-			description:"the specification git project path. Default: '.'",
-			example:"'whodid heavy --path=./"
-		},{
-			name:"since",
-			short:"s",
-			type:"string",
-			description:"commition date",
-			example:"'whodid heavy --since=2.month"
-		},{
-			name:"author",
-			type:"string",
-			description:"author filter",
-			example:"'whodid heavy --since=2.month"
-		},{
+	options:make_extra_option([{
 			name:"num",
 			type:"integer",
-			description:"number of top heavy to see",
-			example:"'whodid heavy --since=2.month --author=zero --num=10"
-		}
-	]
+			description:"number of result",
+			example:"'whodid file --since=2.month --num=10"
+		}])
 });
 
 var args = argv.run();
-//console.log(JSON.stringify(args.options))
+
+let path = args.options.path?args.options.path:"./";
+let since = args.options.since?args.options.since:"1.month";
+let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
+let include_merge = ((!!args.options['include-merge'])	? args.options['include-merge']	: false);
+let commit_drop_threshold = ((!!args.options['commit-drop-threshold'])	? args.options['commit-drop-threshold']	: 10000);
+
+let commits = whodid.get_commits(path, since, verbose, include_merge, commit_drop_threshold)
+
 switch(args.mod) {
 
+	default:
 	case "author":
-	{
-		let path 	= ((!!args.options.path) 	? args.options.path 	: "./");
-		let since = ((!!args.options.since)	? args.options.since	: "1.month");
-		let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
-		//console.log(path, since)
-		whodid_author.run(path, since, verbose)
-	}
+		whodid_author.run(commits)
 	break;
 
 	case "file":
 	{
-		let path = args.options.path?args.options.path:"./";
-		let since = args.options.since?args.options.since:"1.month";
-		let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
 		let num = ((!!args.options.num)	? args.options.num	: 3);
-		whodid_file.run(path, since, verbose, num)
+		whodid_file.run(commits, num)
 	}
 	break;
 
 	case "heavy":
 	{
-		let path = args.options.path?args.options.path:"./";
-		let since = args.options.since?args.options.since:"1.month";
-		let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
+		let author = args.options.author?args.options.author:null;
 		let num = ((!!args.options.num)	? args.options.num	: 3);
-		let author = args.options.author
-		//console.log("path:", path)
-		//console.log("verbose:", verbose)
-		whodid_heavy.run(path, since, verbose, num, author)
+		whodid_heavy.run(commits, num, author)
 	}
 	break;
 
-	default:
-		let path 	= ((!!args.options.path) 	? args.options.path 	: "./");
-		let since = ((!!args.options.since)	? args.options.since	: "1.month");
-		let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
-		//console.log(path, since)
-		whodid_author.run(path, since, verbose)
-		//console.log("mode required. check out whodid -h");
-	break;
 }
 

@@ -22,6 +22,15 @@ $ npm install -g whodid
 # Usage
 
 
+befor run `whodid` you have to pull from git repository
+
+```bash
+$ git pull origin master
+```
+
+and then..
+
+
 check most contributed author in 1.month
 
 ```bash
@@ -49,7 +58,7 @@ $ whodid author --path=<your-project-path> --since=1.month --verbose=false
 ### Default action
 
 ```bash
-$ whodid --path=./ --since=1.month --verbose=false
+$ whodid --path=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=10000
 ```
 is same as
 

@@ -1,4 +1,4 @@
-let whodid = require('./whodid.js')
+
 
 function store(storage, commit){
 	
@@ -13,13 +13,11 @@ function store(storage, commit){
 	return dict
 }
 
-function run(dir=__dirname, since='1.month', verbose=true, num=3, author_filter=null){
+function run(commits, num=3, author_filter=null){
 	
-	let commits = whodid.get_commits(dir, since, verbose)
-
 	let storage = {}
-	commits.forEach(commit=>{ store(storage, commit) })
 
+	commits.forEach(commit=>{ store(storage, commit) })
 
 	for(let author in storage){
 		if(!!author_filter && author != author_filter)
@@ -31,6 +29,7 @@ function run(dir=__dirname, since='1.month', verbose=true, num=3, author_filter=
 			return b.totalWeight - a.totalWeight
 		})
 
+		console.log("\n")
 		console.log(author)
 		grouped_commits.length = num
 		grouped_commits.forEach(commit=>{
