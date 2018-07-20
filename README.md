@@ -49,7 +49,7 @@ check what is most heavy commit of each author
 $ whodid heavy --path=<your-project-path> --since=1.month
 ```
 
-you can make it quite with verbose flag
+you can make it quiet with verbose flag
 
 ```bash
 $ whodid author --path=<your-project-path> --since=1.month --verbose=false
