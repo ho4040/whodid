@@ -6,7 +6,7 @@ let whodid_heavy = require('./whodid-heavy.js')
 var os = require('os');
 var argv = require( 'argv' );
 
-argv.version('v1.0.1');
+argv.version('v1.0.2');
 
 argv.info([
 	"whodid",
