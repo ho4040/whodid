@@ -65,3 +65,18 @@ is same as
 ```bash
 $ whodid
 ```
+
+# Make exceptions
+
+To avoid count added module in commit speicify Regexp on 'whodid.json'.
+
+```json
+{
+	"ignore":[
+			".+.svg",
+			".+/bower_components/.+",
+			".+/node_modules/.+",
+			".+/__libs__/.+"
+	]
+}
+```
