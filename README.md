@@ -71,7 +71,7 @@ $ whodid
 
 To avoid counting of external library files or image files in commit, 
 
-please just specify Regexp on 'whodid.json' and make it place this file in your project directory.
+please just specify Regexp on 'whodid.json' and make this file place in your project directory.
 
 ```json
 {
