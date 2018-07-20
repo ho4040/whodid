@@ -7,7 +7,7 @@ let whodid_heavy = require('./whodid-heavy.js')
 var os = require('os');
 var argv = require( 'argv' );
 
-argv.version('v1.0.7');
+argv.version('v1.0.8');
 
 function make_extra_option(options){
 	return [
@@ -99,6 +99,21 @@ argv.mod({
 		}])
 });
 
+argv.mod({
+	mod:'debug',
+	description:[
+		"show log commit parsing log",
+		"Examples:",
+		"\twhodid debug --commit=<commit-id>",
+	].join(os.EOL),
+	options:make_extra_option([{
+			name:"commit",
+			type:"string",
+			description:"commit hash",
+			example:"'whodid debug --commit=a1b2c3d"
+		}])
+});
+
 var args = argv.run();
 
 let path = args.options.path?args.options.path:"./";
@@ -109,6 +124,9 @@ let valid_threshold = ((!!args.options['valid-threshold'])	? args.options['valid
 let as_json = ((!!args.options['as-json'])	? args.options['as-json']	: false);
 let num = ((!!args.options.num)	? args.options.num	: 10);
 
+if(path[path.length-1] != "/")
+	path = path+"/"
+
 if(verbose){	
 	console.log("path:", path)
 	console.log("since:", since)
@@ -118,22 +136,43 @@ if(verbose){
 	console.log("num:", num)
 }
 
-let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)
+whodid.load_config(path, verbose)
 
 switch(args.mod) {
 
-	default:
 	case "author":
+	default:
+	{
+		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
 		whodid_author.run(commits, num, as_json)
+	}
 	break;
 
 	case "file":
+	{
+		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
 		whodid_file.run(commits, num, as_json)
+	}
 	break;
 
 	case "heavy":
+	{
+		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
 		let author = args.options.author?args.options.author:null;
 		whodid_heavy.run(commits, num, author, as_json)
+	}
+	break;
+
+	case "debug":
+	{
+		let commitId = args.options.commit?args.options.commit:null;
+		if(commitId == null)
+			console.log("commit option required")
+		else{
+			console.log("debug commit: ", commitId)
+			whodid.get_commit_detail(commitId, path, true)
+		}
+	}
 	break;
 
 }

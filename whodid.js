@@ -4,9 +4,7 @@ var execSync = require('child_process').execSync
 var fs = require('fs')
 var config = null
 
-
-function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, valid_threshold=1000) {
-
+function load_config(dir, verbose){
 	let configFilePath = dir+'whodid.json'
 	if(fs.existsSync(configFilePath))
 	{
@@ -22,6 +20,10 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 			console.log('\x1b[31m%s\x1b[0m',"[WARN]can't find config file from ", configFilePath)
 		config = Object.assign({ignore:[], verbose:verbose})
 	}
+}
+
+function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, valid_threshold=1000) {
+
 
 	let result = execSync(`git log --since=${since} --abbrev-commit --oneline`, {cwd:dir}).toString()
 	let commitList = []
@@ -55,36 +57,43 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 	return newCommitList
 }
 
-function parse_line(data, line){
+function parse_line(commit, line, show_each_file=false){
 	if(line.indexOf("Merge:") == 0){
-		data["merge"] = line.split(":")[1].trim().split(" ")
+		commit["merge"] = line.split(":")[1].trim().split(" ")
 	}
 	else if(line.indexOf("Author:") == 0){
-		data["author"] = line.split(":")[1].trim()
+		commit["author"] = line.split(":")[1].trim()
 	}
 	else if(line.indexOf("Date:") == 0){
-		data["date"] = line.substr("Date:".length).trim()
+		commit["date"] = line.substr("Date:".length).trim()
 	}
 	else if(line.match(/(.+)\s+\|\s+(\d+)\s.+/) != null){
 		modInfo = line.match(/(.+)\s+\|\s+(\d+)\s.+/)
 		filename = modInfo[1].trim()
 		lineNum = parseInt(modInfo[2])
+
 		let matched = config.ignore.find(re=>{ return filename.match(re) != null })
-		if(matched == null)
-			data.modifications.push({"filename":filename, "editAmt":lineNum})
-		else if(config.verbose)
-			console.log("\tignore:", filename, matched)
+		if(matched == null){			
+			commit.modifications.push({"filename":filename, "editAmt":lineNum})
+		}
+
+		if(show_each_file){
+			if(matched == null)
+				console.log("  accept:", lineNum, "\t", filename)	
+			else
+				console.log("  reject:", lineNum, "\t", filename, "\t", matched)
+		}
 	}
 }
 
-function get_commit_detail(commitId, dir=__dirname){
+function get_commit_detail(commitId, dir=__dirname, show_each_file=false){
 
 	let commit = { id:commitId, modifications:[] }
-	let result = execSync(`git show ${commitId} --stat`, {cwd:dir}).toString()
+	let result = execSync(`git show ${commitId} --stat=256`, {cwd:dir}).toString()
 
 	let lines = result.split("\n")
 	lines.forEach(line=>{
-		parse_line(commit, line)
+		parse_line(commit, line, show_each_file)
 	})
 
 
@@ -92,4 +101,4 @@ function get_commit_detail(commitId, dir=__dirname){
 
 }
 
-module.exports = {get_commits}
+module.exports = {get_commits, load_config, get_commit_detail}
