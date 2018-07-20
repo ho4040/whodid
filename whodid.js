@@ -1,8 +1,26 @@
 // whodid.js
 var execSync = require('child_process').execSync
 //var tdqm = require("ntqdm")();
+var fs = require('fs')
+var config = null
 
-function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, commit_drop_threshold=2000) {
+
+function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, valid_threshold=1000) {
+
+	let configFilePath = dir+'/whodid.json'
+	if(fs.existsSync(configFilePath))
+	{
+		var confFile = fs.readFileSync(configFilePath, 'utf8');
+		config = Object.assign({ignore:[], verbose:verbose}, JSON.parse(confFile))
+		config.ignore = config.ignore.map(str=>{ return RegExp(str, 'g')})
+		if(verbose)
+			console.log("config loaded from ", configFilePath)
+		//console.log("  ignore:", ignoreReList)
+	}
+	else{
+		if(verbose)
+			console.log('\x1b[31m%s\x1b[0m',"[WARN]can't find config file from ", configFilePath)
+	}
 
 	let result = execSync(`git log --since=${since} --abbrev-commit --oneline`, {cwd:dir}).toString()
 	let commitList = []
@@ -19,11 +37,13 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 		c.text = commit.text
 		c.totalWeight = 0
 		c.modifications.forEach( mod=>{
-				if(mod.editAmt < commit_drop_threshold)
+				if(mod.editAmt < valid_threshold)
 					c.totalWeight += 	mod.editAmt
 		})
-		if(verbose)
-			console.log(`${commit.id}\t${c.totalWeight}\t${c.author}\t${(('merge' in c) ? '\tMERGE' : '') }`)
+
+		if(verbose && !!commit.id)
+			console.log('\x1b[36m%s\x1b[0m',`${commit.id}`,`${c.totalWeight}\t${c.author}\t${(('merge' in c) ? '\tMERGE' : '') }`)
+		
 		return c
 	})
 
@@ -46,9 +66,13 @@ function parse_line(data, line){
 	}
 	else if(line.match(/(.+)\s+\|\s+(\d+)\s.+/) != null){
 		modInfo = line.match(/(.+)\s+\|\s+(\d+)\s.+/)
-		filename = modInfo[1]
+		filename = modInfo[1].trim()
 		lineNum = parseInt(modInfo[2])
-		data.modifications.push({"filename":filename, "editAmt":lineNum})
+		let matched = config.ignore.find(re=>{ return filename.match(re) != null })
+		if(matched == null)
+			data.modifications.push({"filename":filename, "editAmt":lineNum})
+		else if(config.verbose)
+			console.log("\tignore:", filename, matched)
 	}
 }
 
