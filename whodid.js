@@ -36,11 +36,10 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 	})
 
 	let newCommitList = commitList.map(commit=>{		
-		let c = get_commit_detail(commit.id, dir)
+		let c = get_commit_detail(commit.id, dir, false, valid_threshold)
 		c.text = commit.text
 		c.totalWeight = 0
 		c.modifications.forEach( mod=>{
-				if(mod.editAmt < valid_threshold)
 					c.totalWeight += 	mod.editAmt
 		})
 
@@ -57,7 +56,7 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 	return newCommitList
 }
 
-function parse_line(commit, line, show_each_file=false){
+function parse_line(commit, line, show_each_file=false, valid_threshold=1000){
 	if(line.indexOf("Merge:") == 0){
 		commit["merge"] = line.split(":")[1].trim().split(" ")
 	}
@@ -73,27 +72,30 @@ function parse_line(commit, line, show_each_file=false){
 		lineNum = parseInt(modInfo[2])
 
 		let matched = config.ignore.find(re=>{ return filename.match(re) != null })
-		if(matched == null){			
+		if(matched == null && valid_threshold > lineNum){			
 			commit.modifications.push({"filename":filename, "editAmt":lineNum})
 		}
 
 		if(show_each_file){
-			if(matched == null)
+			if(matched == null && valid_threshold > lineNum)
 				console.log("  accept:", lineNum, "\t", filename)	
+			else if(valid_threshold <= lineNum)
+				console.log("  \x1b[31mtoo-big\x1b[0m:", lineNum, "\t", filename, "\tvalid_threshold:"+valid_threshold )	
 			else
-				console.log("  reject:", lineNum, "\t", filename, "\t", matched)
+				console.log("  \x1b[31mignore\x1b[0m:", lineNum, "\t", filename, "\t", matched)
+
 		}
 	}
 }
 
-function get_commit_detail(commitId, dir=__dirname, show_each_file=false){
+function get_commit_detail(commitId, dir=__dirname, show_each_file=false, valid_threshold=1000){
 
-	let commit = { id:commitId, modifications:[] }
+	let commit = { id:commitId, modifications:[]}
 	let result = execSync(`git show ${commitId} --stat=256`, {cwd:dir}).toString()
 
 	let lines = result.split("\n")
 	lines.forEach(line=>{
-		parse_line(commit, line, show_each_file)
+		parse_line(commit, line, show_each_file, valid_threshold)
 	})
 
 

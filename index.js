@@ -7,7 +7,7 @@ let whodid_heavy = require('./whodid-heavy.js')
 var os = require('os');
 var argv = require( 'argv' );
 
-argv.version('v1.0.8');
+argv.version('v1.0.9');
 
 function make_extra_option(options){
 	return [
@@ -170,7 +170,10 @@ switch(args.mod) {
 			console.log("commit option required")
 		else{
 			console.log("debug commit: ", commitId)
-			whodid.get_commit_detail(commitId, path, true)
+			let commit = whodid.get_commit_detail(commitId, path, true, valid_threshold)
+			let total = 0
+			commit.modifications.forEach(e=>{ total += e.editAmt})
+			console.log("  total accepted line:", total)
 		}
 	}
 	break;
