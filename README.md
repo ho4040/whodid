@@ -32,19 +32,19 @@ $ git pull origin master
 and then..
 
 
-check most contributed author in 1.month
+#### check most contributed author in 1.month
 
 ```bash
 $ whodid author --path=<your-project-path> --since=1.month
 ```
 
-check most modfied files
+#### check most modfied files
 
 ```bash
 $ whodid file --verbose=false --path=<your-project-path> --since=1.month
 ```
 
-check what is most heavy commit of each author
+#### check what is most heavy commit of each author
 
 ```bash
 $ whodid heavy --path=<your-project-path> --since=1.month
