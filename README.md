@@ -3,7 +3,8 @@
 CLI contribution check tool from git repository.
 this tool read all log with `git log` command and count edited line from all commits.
 
-![demo](https://i.imgur.com/pTNouLE.png)
+
+![demo](https://i.imgur.com/T9mJfIk.png)
 
 
 ### Features
