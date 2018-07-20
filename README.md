@@ -68,7 +68,9 @@ $ whodid
 
 # Make exceptions
 
-To avoid count added module in commit speicify Regexp on 'whodid.json'.
+To avoid counting of external library files or image files in commit, 
+
+please just specify Regexp on 'whodid.json' and make it place this file in your project directory.
 
 ```json
 {
