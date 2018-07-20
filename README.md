@@ -22,10 +22,10 @@ $ npm install -g whodid
 
 # Usage
 
-
 befor run `whodid` you have to pull from git repository
 
 ```bash
+$ cd your-proj-dir
 $ git pull origin master
 ```
 
@@ -65,6 +65,12 @@ is same as
 
 ```bash
 $ whodid
+```
+
+and you can check another options in help command.
+
+```bash
+$ whodid --help
 ```
 
 # Make exceptions
