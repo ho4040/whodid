@@ -56,7 +56,23 @@ you can make it quiet with verbose flag
 $ whodid author --path=<your-project-path> --since=1.month --verbose=false
 ```
 
-### Default action
+
+#### json result
+
+you can get json output with `--as-json` option
+
+```bash
+$ whodid --path=./ --as_json=true
+```
+
+#### you can check another options in help command.
+
+```bash
+$ whodid --help
+```
+
+
+#### Default action
 
 ```bash
 $ whodid --path=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=2000
@@ -67,11 +83,9 @@ is same as
 $ whodid
 ```
 
-and you can check another options in help command.
 
-```bash
-$ whodid --help
-```
+
+
 
 # Make exceptions
 
