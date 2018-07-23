@@ -100,6 +100,8 @@ Specify Regexp on `whodid.json` and make this file place in your project directo
 			".+/bower_components/.+",
 			".+/node_modules/.+",
 			".+/__libs__/.+"
-	]
+	],
+
+	"deleteLineAdjustRatio":0.1
 }
 ```
