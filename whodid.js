@@ -57,6 +57,13 @@ function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge
 }
 
 function parse_line(commit, line, show_each_file=false, valid_threshold=1000){
+
+	let re = /(.+)\s+\|\s+(\d+)\s(\+*)(\-*)/
+
+	let deleteAdjustRatio = 0.2
+	if( "deleteLineAdjustRatio" in config)
+		deleteAdjustRatio = config.deleteLineAdjustRatio
+
 	if(line.indexOf("Merge:") == 0){
 		commit["merge"] = line.split(":")[1].trim().split(" ")
 	}
@@ -66,10 +73,21 @@ function parse_line(commit, line, show_each_file=false, valid_threshold=1000){
 	else if(line.indexOf("Date:") == 0){
 		commit["date"] = line.substr("Date:".length).trim()
 	}
-	else if(line.match(/(.+)\s+\|\s+(\d+)\s.+/) != null){
-		modInfo = line.match(/(.+)\s+\|\s+(\d+)\s.+/)
+	else if(line.match(re) != null){
+		modInfo = line.match(re)
 		filename = modInfo[1].trim()
 		lineNum = parseInt(modInfo[2])
+
+		plusLineRatio = modInfo[3].length
+		minusLineRatio = modInfo[4].length
+		plusLineRatio 	= plusLineRatio / (plusLineRatio + minusLineRatio)
+		minusLineRatio 	= minusLineRatio / (plusLineRatio + minusLineRatio)
+
+		plusLine = plusLineRatio * lineNum
+		minusLine = minusLineRatio * lineNum * deleteAdjustRatio
+
+		totalLine = lineNum
+		lineNum = Math.floor(plusLine + minusLine)
 
 		let matched = config.ignore.find(re=>{ return filename.match(re) != null })
 		if(matched == null && valid_threshold > lineNum){			
