@@ -22,10 +22,10 @@ function load_config(dir, verbose){
 	}
 }
 
-function get_commits(dir=__dirname, since='1.month', verbose=true, include_merge=false, valid_threshold=1000) {
+function get_commits(dir=__dirname, since='1.month', until="now", verbose=true, include_merge=false, valid_threshold=1000) {
 
 
-	let result = execSync(`git log --since=${since} --abbrev-commit --oneline`, {cwd:dir}).toString()
+	let result = execSync(`git log --since=${since} --until=${until} --abbrev-commit --oneline`, {cwd:dir}).toString()
 	let commitList = []
 
 	commitTexts = result.split("\n")

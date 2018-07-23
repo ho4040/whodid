@@ -7,7 +7,7 @@ let whodid_heavy = require('./whodid-heavy.js')
 var os = require('os');
 var argv = require( 'argv' );
 
-argv.version('v1.0.10');
+argv.version('v1.0.11');
 
 function make_extra_option(options){
 	return [
@@ -26,6 +26,11 @@ function make_extra_option(options){
 			type:"string",
 			description:"counting start day. (deafult:2.month)",
 			example:"'whodid author --since=2.month"
+		},{
+			name:"until",
+			type:"string",
+			description:"counting end day. (deafult:now)",
+			example:"'whodid author --until=now"
 		},{
 			name:"include-merge",
 			type:"boolean",
@@ -118,6 +123,7 @@ var args = argv.run();
 
 let path = args.options.path?args.options.path:"./";
 let since = args.options.since?args.options.since:"1.month";
+let until = args.options.until?args.options.until:"now";
 let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
 let include_merge = ((!!args.options['include-merge'])	? args.options['include-merge']	: false);
 let valid_threshold = ((!!args.options['valid-threshold'])	? args.options['valid-threshold']	: 1000);
@@ -130,6 +136,7 @@ if(path[path.length-1] != "/")
 if(verbose){	
 	console.log("path:", path)
 	console.log("since:", since)
+	console.log("until:", until)
 	console.log("include-merge:", include_merge)
 	console.log("valid-threshold:", valid_threshold)
 	console.log("as-json:", as_json)
@@ -143,21 +150,21 @@ switch(args.mod) {
 	case "author":
 	default:
 	{
-		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
+		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
 		whodid_author.run(commits, num, as_json)
 	}
 	break;
 
 	case "file":
 	{
-		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
+		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
 		whodid_file.run(commits, num, as_json)
 	}
 	break;
 
 	case "heavy":
 	{
-		let commits = whodid.get_commits(path, since, verbose, include_merge, valid_threshold)	
+		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
 		let author = args.options.author?args.options.author:null;
 		whodid_heavy.run(commits, num, author, as_json)
 	}
