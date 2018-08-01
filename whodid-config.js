@@ -14,9 +14,14 @@ var _m = {
 	}
 }
 
-function load_from_file(config_filename){
+function load_from_file(config_filename, cwd){
+
+	if(!cwd)
+		cwd = "./"
+	else if (cwd[cwd.length-1] != "/")
+		cwd = cwd+"/"
 	
-	let config_file_path = config_filename
+	let config_file_path = cwd+config_filename
 
 	if(fs.existsSync(config_file_path)) {
 		var confFile = fs.readFileSync(config_file_path, 'utf8');
