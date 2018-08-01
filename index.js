@@ -10,7 +10,7 @@ let whodid_file 	= require('./whodid-file.js')
 let to_snake_case 	= require('lodash.snakecase')
 
 
-argv.version('v1.0.11');
+argv.version('v1.0.12');
 
 function make_extra_option(options){
 	return [
