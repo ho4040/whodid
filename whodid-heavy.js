@@ -1,4 +1,4 @@
-
+var whodid_config = require('./whodid-config.js')
 
 function store(storage, commit){
 	
@@ -13,39 +13,35 @@ function store(storage, commit){
 	return dict
 }
 
-function run(commits, num=3, author_filter=null, as_json=false){
-	
+function run(commits) {
+
+	let config = whodid_config.retrieve()
 	let storage = {}
 
 	commits.forEach(commit=>{ store(storage, commit) })
 
-	if(as_json){
+	if(config.as_json){
 		console.log(JSON.stringify(storage))
 	}else{
 		for(let author in storage){
-			if(!!author_filter && author != author_filter)
-				continue
 
 			grouped_commits = storage[author]
 			grouped_commits = grouped_commits.sort((a, b)=>{
-				//console.log(JSON.stringify(a))
-				return b.totalWeight - a.totalWeight
+				return b.score - a.score
 			})
 
 			console.log("\n")
 			console.log(author)
-			grouped_commits.length = num
-
+			grouped_commits.length = config.num
 
 			console.log("=====================================================")
 			console.log(" commit\t| line\t | note")
 			console.log("-----------------------------------------------------")
 			grouped_commits.forEach(e=>{
-				if(!!e.id)
-				console.log(`\x1b[36m${e.id}\x1b[0m\t| ${e.totalWeight}\t | ${e.text.split("\n")[0]}`)
+				if(!!e.hash)
+				console.log(`\x1b[36m${e.hash.substr(0,7)}\x1b[0m\t| ${e.score.toFixed(0)}\t | ${e.subject.split("\n")[0]}`)
 			})
 			console.log("=====================================================")
-
 		}
 	}
 

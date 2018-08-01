@@ -1,11 +1,14 @@
 #! /usr/bin/env node
-let whodid = require('./whodid.js')
-let whodid_author = require('./whodid-author.js')
-let whodid_file = require('./whodid-file.js')
-let whodid_heavy = require('./whodid-heavy.js')
 
-var os = require('os');
-var argv = require( 'argv' );
+let os 				= require('os');
+let argv 			= require( 'argv' );
+let whodid_config 	= require('./whodid-config.js')
+let whodid_base 	= require('./whodid.js')
+let whodid_author 	= require('./whodid-author.js')
+let whodid_heavy 	= require('./whodid-heavy.js')
+let whodid_file 	= require('./whodid-file.js')
+let to_snake_case 	= require('lodash.snakecase')
+
 
 argv.version('v1.0.11');
 
@@ -17,10 +20,10 @@ function make_extra_option(options){
 			description:"show process or not (default:false)",
 			example:"'whodid author --verbose=false"
 		},{
-			name:"path",
+			name:"cwd",
 			type:"string",
-			description:"the specification git project path.(default: './')",
-			example:"'whodid author --path=/home/ubuntu/someProj"
+			description:"the specification git project cwd.(default: './')",
+			example:"'whodid author --cwd=/home/ubuntu/someProj"
 		},{
 			name:"since",
 			type:"string",
@@ -37,10 +40,10 @@ function make_extra_option(options){
 			description:"specify include merge commit or not.(default: false)",
 			example:"'whodid author --include-merge=true"
 		},{
-			name:"valid-threshold",
+			name:"line-accept-max",
 			type:"integer",
-			description:"drop file when counting lines, if number of modifed line is to big.(default:1000)",
-			example:"'whodid author --valid-threshold=10000"
+			description:"set acceptable limit of modified line number",
+			example:"'whodid author --line-accept-max=10000"
 		},{
 			name:"as-json",
 			type:"boolean",
@@ -121,69 +124,58 @@ argv.mod({
 
 var args = argv.run();
 
-let path = args.options.path?args.options.path:"./";
-let since = args.options.since?args.options.since:"1.month";
-let until = args.options.until?args.options.until:"now";
-let verbose = ((!!args.options.verbose)	? args.options.verbose	: false);
-let include_merge = ((!!args.options['include-merge'])	? args.options['include-merge']	: false);
-let valid_threshold = ((!!args.options['valid-threshold'])	? args.options['valid-threshold']	: 1000);
-let as_json = ((!!args.options['as-json'])	? args.options['as-json']	: false);
-let num = ((!!args.options.num)	? args.options.num	: 10);
+var opts = {}
+for(let k in args.options)
+	opts[to_snake_case(k)] = args.options[k] 
 
-if(path[path.length-1] != "/")
-	path = path+"/"
-
-if(verbose){	
-	console.log("path:", path)
-	console.log("since:", since)
-	console.log("until:", until)
-	console.log("include-merge:", include_merge)
-	console.log("valid-threshold:", valid_threshold)
-	console.log("as-json:", as_json)
-	console.log("num:", num)
-}
-
-whodid.load_config(path, verbose)
+whodid_config.load_from_file("whodid.json", opts.cwd)
+whodid_config.adjust(opts)
+if(!!opts.verbose)
+	console.log(JSON.stringify(whodid_config.retrieve(), null, 4))
 
 switch(args.mod) {
-
 	case "author":
 	default:
 	{
-		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
-		whodid_author.run(commits, num, as_json)
+		let commits = whodid_base.get_commits()	
+		whodid_author.run(commits)
 	}
 	break;
-
-	case "file":
-	{
-		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
-		whodid_file.run(commits, num, as_json)
-	}
-	break;
-
 	case "heavy":
 	{
-		let commits = whodid.get_commits(path, since, until, verbose, include_merge, valid_threshold)	
-		let author = args.options.author?args.options.author:null;
-		whodid_heavy.run(commits, num, author, as_json)
+		let commits = whodid_base.get_commits()	
+		whodid_heavy.run(commits)
+	}
+	break;
+	case "file":
+	{
+		let commits = whodid_base.get_commits()	
+		whodid_file.run(commits)
 	}
 	break;
 
 	case "debug":
 	{
-		let commitId = args.options.commit?args.options.commit:null;
-		if(commitId == null)
+		let commit_hash = args.options.commit?args.options.commit:null;
+		if(commit_hash == null)
 			console.log("commit option required")
 		else{
-			console.log("debug commit: ", commitId)
-			let commit = whodid.get_commit_detail(commitId, path, true, valid_threshold)
+			console.log("debug commit: ", commit_hash)
+			let commit = whodid_base.load_detail(commit_hash)
 			let total = 0
-			commit.modifications.forEach(e=>{ total += e.editAmt})
+			
+			commit.modifications.forEach(e=>{
+				console.log(`  [accept] ${e.edit_line_num} lines\t ${e.filename}`)
+			})
+			
+			commit.ignored.forEach(e=>{
+				console.log(`  [ignore] ${e.filename} by ${e.reason.type}`)
+			})
+
+			commit.modifications.forEach(e=>{ total += e.edit_line_num})
 			console.log("  total accepted line:", total)
 		}
 	}
 	break;
-
 }
 

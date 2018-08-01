@@ -1,124 +1,99 @@
 // whodid.js
 var execSync = require('child_process').execSync
-//var tdqm = require("ntqdm")();
-var fs = require('fs')
-var config = null
+var whodid_config = require('./whodid-config.js')
 
-function load_config(dir, verbose){
-	let configFilePath = dir+'whodid.json'
-	if(fs.existsSync(configFilePath))
-	{
-		var confFile = fs.readFileSync(configFilePath, 'utf8');
-		config = Object.assign({ignore:[], verbose:verbose}, JSON.parse(confFile))
-		config.ignore = config.ignore.map(str=>{ return RegExp(str, 'g')})
-		if(verbose)
-			console.log("config loaded from ", configFilePath)
-	}
-	else
-	{
-		if(verbose)
-			console.log('\x1b[31m%s\x1b[0m',"[WARN]can't find config file from ", configFilePath)
-		config = Object.assign({ignore:[], verbose:verbose})
-	}
+function build_command(){
+	let config = whodid_config.retrieve() 
+	let cmd = `git log --pretty=format:"%ad||%an||%H||%s" --date="iso-local"`
+	let opts = []
+	if( !config.include_merge )
+		opts.push("--no-merges")
+	if('until' in config)
+		opts.push(`--until="${config.until}"`)
+	if('since' in config)
+		opts.push(`--since="${config.since}"`)
+	if('author' in config)
+		opts.push(`--author="${config.author}"`)
+	cmd += " " + opts.join(" ")
+	return cmd
 }
 
-function get_commits(dir=__dirname, since='1.month', until="now", verbose=true, include_merge=false, valid_threshold=1000) {
-
-
-	let result = execSync(`git log --since=${since} --until=${until} --abbrev-commit --oneline`, {cwd:dir}).toString()
-	let commitList = []
-
-	commitTexts = result.split("\n")
-	commitTexts.forEach(item=>{
-		commitId = item.substr(0, 7)
-		text = item.substr(7)	
-		commitList.push({id:commitId, text:text})
+function get_commits(include_detail=true, verbose=false){
+	
+	let cmd = build_command()
+	let config = whodid_config.retrieve()
+	
+	if(config.verbose)
+		console.log(cmd)
+	
+	let result = execSync(cmd, {cwd:config.cwd}).toString()
+	var items = result.split("\n").map(e=>{
+		let items = e.split("||")
+		let date = items[0]
+		let author = items[1]
+		let hash = items[2]
+		let subject = items[3]
+		return {date, author, hash, subject}
 	})
 
-	let newCommitList = commitList.map(commit=>{		
-		let c = get_commit_detail(commit.id, dir, false, valid_threshold)
-		c.text = commit.text
-		c.totalWeight = 0
-		c.modifications.forEach( mod=>{
-					c.totalWeight += 	mod.editAmt
+	if(include_detail) {
+		items = items.map(commit=>{
+			if(verbose)
+				console.log("load commit detail : ", commit.has)
+			return Object.assign(commit, load_detail(commit.hash))
 		})
+	}
+	return items
+}
 
-		if(verbose && !!commit.id)
-			console.log('\x1b[36m%s\x1b[0m',`${commit.id}`,`${c.totalWeight}\t${c.author}\t${(('merge' in c) ? '\tMERGE' : '') }`)
+function load_detail(commit_hash){
+	
+	let config = whodid_config.retrieve()
+	let cmd = `git show ${commit_hash} --stat`
+	let result = execSync(cmd, {cwd:config.cwd}).toString()
+	let digest_line = function(line, storage){
 		
-		return c
+		let commit_matched 			= line.match(/(commit)\s(.+)/)
+		let modification_matched 	= line.match(/\s+(.+)\|\s(\d+)\s(\+*)(\-*)/)
+		let author_matched 			= line.match(/(Author:)\s(.+)/)
+		let date_matched 			= line.match(/(Date:)\s(.+)/)
+
+		if(modification_matched){
+			
+			let filename = modification_matched[1].trim()
+			let ignore_regexp = config.ignore.find(re=>{ return !!filename.match(RegExp(re, 'g'))  })
+			
+			if(!!ignore_regexp) {
+				storage.ignored.push({filename : filename, reason:{type:'regexp', target:ignore_regexp}})
+			}
+
+			storage.modifications.push({
+				filename : filename,
+				edit_line_num : parseInt(modification_matched[2]) < parseInt(config.line_accept_max) ? parseInt(modification_matched[2]) : 0,
+				insert_ratio : modification_matched[3].length / (modification_matched[4] + modification_matched[3]).length,
+				remove_ratio : modification_matched[4].length / (modification_matched[4] + modification_matched[3]).length
+			})
+		}
+		else if(commit_matched){}
+		else if(author_matched){}
+		else if(date_matched){}
+	}
+
+	let storage = {modifications:[], ignored:[]}
+	
+	// get modifications
+	result.split("\n").forEach(line=>{
+		digest_line(line, storage)
 	})
 
-	if(include_merge == false)
-		newCommitList = newCommitList.filter(e=>{ return 'merge' in e == false })
+	// evaluate score
+	storage.score = storage.modifications.map(e=>{ 
+		return e.edit_line_num * e.insert_ratio 
+	}).reduce((a,b)=>a+b, 0)
+	
 
-	// console.log("----------------------")
-	return newCommitList
+	return storage
 }
 
-function parse_line(commit, line, show_each_file=false, valid_threshold=1000){
 
-	let re = /(.+)\s+\|\s+(\d+)\s(\+*)(\-*)/
-
-	let deleteAdjustRatio = 0.2
-	if( "deleteLineAdjustRatio" in config)
-		deleteAdjustRatio = config.deleteLineAdjustRatio
-
-	if(line.indexOf("Merge:") == 0){
-		commit["merge"] = line.split(":")[1].trim().split(" ")
-	}
-	else if(line.indexOf("Author:") == 0){
-		commit["author"] = line.split(":")[1].trim()
-	}
-	else if(line.indexOf("Date:") == 0){
-		commit["date"] = line.substr("Date:".length).trim()
-	}
-	else if(line.match(re) != null){
-		modInfo = line.match(re)
-		filename = modInfo[1].trim()
-		lineNum = parseInt(modInfo[2])
-
-		plusLineRatio = modInfo[3].length
-		minusLineRatio = modInfo[4].length
-		plusLineRatio 	= plusLineRatio / (plusLineRatio + minusLineRatio)
-		minusLineRatio 	= minusLineRatio / (plusLineRatio + minusLineRatio)
-
-		plusLine = plusLineRatio * lineNum
-		minusLine = minusLineRatio * lineNum * deleteAdjustRatio
-
-		totalLine = lineNum
-		lineNum = Math.floor(plusLine + minusLine)
-
-		let matched = config.ignore.find(re=>{ return filename.match(re) != null })
-		if(matched == null && valid_threshold > lineNum){			
-			commit.modifications.push({"filename":filename, "editAmt":lineNum})
-		}
-
-		if(show_each_file){
-			if(matched == null && valid_threshold > lineNum)
-				console.log("  accept:", lineNum, "\t", filename)	
-			else if(valid_threshold <= lineNum)
-				console.log("  \x1b[31mtoo-big\x1b[0m:", lineNum, "\t", filename, "\tvalid_threshold:"+valid_threshold )	
-			else
-				console.log("  \x1b[31mignore\x1b[0m:", lineNum, "\t", filename, "\t", matched)
-
-		}
-	}
-}
-
-function get_commit_detail(commitId, dir=__dirname, show_each_file=false, valid_threshold=1000){
-
-	let commit = { id:commitId, modifications:[]}
-	let result = execSync(`git show ${commitId} --stat=256`, {cwd:dir}).toString()
-
-	let lines = result.split("\n")
-	lines.forEach(line=>{
-		parse_line(commit, line, show_each_file, valid_threshold)
-	})
-
-
-	return commit
-
-}
-
-module.exports = {get_commits, load_config, get_commit_detail}
+module.exports = {get_commits, load_detail}

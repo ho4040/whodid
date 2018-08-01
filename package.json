@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "argv": "git+https://github.com/ho4040/argv.git"
+    "argv": "git+https://github.com/ho4040/argv.git",
+    "lodash.snakecase": "^4.1.1"
   },
   "preferGlobal": true,
   "bin": {
@@ -26,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/ho4040/whodid/issues"
   },
-  "homepage": "https://github.com/ho4040/whodid#readme"
+  "homepage": "https://github.com/ho4040/whodid#readme",
+  "devDependencies": {}
 }
