@@ -1,6 +1,6 @@
 {
   "name": "whodid",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "contribution check tool for git project",
   "main": "index.js",
   "scripts": {

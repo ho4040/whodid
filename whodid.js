@@ -49,7 +49,7 @@ function get_commits(include_detail=true, verbose=false){
 function load_detail(commit_hash){
 	
 	let config = whodid_config.retrieve()
-	let cmd = `git show ${commit_hash} --stat`
+	let cmd = `git show ${commit_hash} --stat=200`
 	let result = execSync(cmd, {cwd:config.cwd}).toString()
 	let digest_line = function(line, storage){
 		
