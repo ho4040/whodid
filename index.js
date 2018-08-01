@@ -9,7 +9,7 @@ let whodid_heavy 	= require('./whodid-heavy.js')
 let whodid_file 	= require('./whodid-file.js')
 let to_snake_case 	= require('lodash.snakecase')
 
-argv.version('v1.0.13');
+argv.version('v1.0.14');
 
 function make_extra_option(options){
 	return [
@@ -127,7 +127,7 @@ var opts = {}
 for(let k in args.options)
 	opts[to_snake_case(k)] = args.options[k] 
 
-whodid_config.load_from_file("whodid.json", opts.cwd)
+whodid_config.load_from_file("whodid.json")
 whodid_config.adjust(opts)
 if(!!opts.verbose)
 	console.log(JSON.stringify(whodid_config.retrieve(), null, 4))

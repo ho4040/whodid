@@ -75,7 +75,7 @@ $ whodid --help
 #### Default action
 
 ```bash
-$ whodid --cwd=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=2000
+$ whodid --cwd=./ --since=1.month --verbose=false --include-merge=false  --line-accept-max=1000
 ```
 is same as
 
