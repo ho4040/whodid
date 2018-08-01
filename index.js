@@ -9,8 +9,7 @@ let whodid_heavy 	= require('./whodid-heavy.js')
 let whodid_file 	= require('./whodid-file.js')
 let to_snake_case 	= require('lodash.snakecase')
 
-
-argv.version('v1.0.12');
+argv.version('v1.0.13');
 
 function make_extra_option(options){
 	return [
