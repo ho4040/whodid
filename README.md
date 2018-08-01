@@ -35,25 +35,25 @@ and then..
 #### check most contributed author in 1.month
 
 ```bash
-$ whodid author --path=<your-project-path> --since=1.month
+$ whodid author --cwd=<your-project-path> --since=1.month
 ```
 
 #### check most modfied files
 
 ```bash
-$ whodid file --verbose=false --path=<your-project-path> --since=1.month
+$ whodid file --verbose=false --cwd=<your-project-path> --since=1.month
 ```
 
 #### check what is most heavy commit of each author
 
 ```bash
-$ whodid heavy --path=<your-project-path> --since=1.month
+$ whodid heavy --cwd=<your-project-path> --since=1.month
 ```
 
 you can make it quiet with verbose flag
 
 ```bash
-$ whodid author --path=<your-project-path> --since=1.month --verbose=false
+$ whodid author --cwd=<your-project-path> --since=1.month --verbose=false
 ```
 
 
@@ -62,7 +62,7 @@ $ whodid author --path=<your-project-path> --since=1.month --verbose=false
 you can get json output with `--as-json` option
 
 ```bash
-$ whodid --path=./ --as_json=true
+$ whodid --cwd=./ --as_json=true
 ```
 
 #### you can check another options in help command.
@@ -75,16 +75,13 @@ $ whodid --help
 #### Default action
 
 ```bash
-$ whodid --path=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=2000
+$ whodid --cwd=./ --since=1.month --verbose=false --include-merge=false  --commit-drop-threshold=2000
 ```
 is same as
 
 ```bash
 $ whodid
 ```
-
-
-
 
 
 # Make exceptions
@@ -101,7 +98,6 @@ Specify Regexp on `whodid.json` and make this file place in your project directo
 			".+/node_modules/.+",
 			".+/__libs__/.+"
 	],
-
-	"deleteLineAdjustRatio":0.1
+	"line_accept_num":1000
 }
 ```
