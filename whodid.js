@@ -35,6 +35,12 @@ function get_commits(include_detail=true, verbose=false){
 		let author = items[1]
 		let hash = items[2]
 		let subject = items[3]
+
+		if(subject.length > 20){
+			subject = subject.substr(0, 20)
+			subject += ".."
+		}
+
 		return {date, author, hash, subject}
 	})
 
