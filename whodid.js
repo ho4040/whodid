@@ -103,7 +103,7 @@ function load_detail(commit_hash){
 	// evaluate score
 	storage.score = storage.modifications.map(e=>{ 
 		return e.edit_line_num * e.insert_ratio 
-	}).reduce((a,b)=>a+b, 0)
+	}).reduce((a,b)=>a+b, 1)
 	
 
 	return storage

@@ -1,10 +1,11 @@
 var whodid_config = require('./whodid-config.js')
 var utils =require('./utils.js')
 
-function store(storage, author, amt){
+function store(storage, commit){
+	let author = commit.author
 	if(author in storage == false)
-		storage[author] = 0
-	storage[author] += amt
+		storage[author] = []
+	storage[author].push(commit)
 	return storage
 }
 
@@ -14,33 +15,33 @@ function run(commits){
 	let storage = {}
 
 	commits.forEach(commit=>{ 
-		store(storage, commit.author, commit.score) 
+		store(storage, commit) 
 	})
 
-	var arr = []
+	let data = [['score', 'author', 'commit num', 'top 3 heavy commit']]
 	for(let author in storage){
-		arr.push({name:author, score:storage[author]})
+		let total_score = storage[author].map(e=>{ return e.score }).reduce((a,b)=>{ return a + b }, 0)
+		let num_commits = storage[author].length
+		storage[author].sort((a,b)=>{ return b.score-a.score })
+		if(storage[author].length > 3) storage[author].length = 3
+		let top_3_commits = storage[author].map(commit=>{ return commit.hash.substr(0,7) }).join(", ")
+		data.push([total_score.toFixed(0), author, num_commits, top_3_commits])
 	}
-	
-	arr.sort((a,b)=>{
-		return b.score - a.score
-	})
-	
-	if(config.num > 0)
-		arr.length = config.num
 
-
-	var result = [['score', 'author']]
-	arr.forEach(e=>{
-		result.push([e.score.toFixed(0), e.name])
+	data.sort((a,b)=>{
+		return b[0] - a[0]
 	})
+
+	if(config.num > 0 && data.length > config.num)
+		data.length = config.num
+
 
 	if(config.output_as=='json')
-		console.log(utils.serialize(result, 'json'))
+		console.log(utils.serialize(data, 'json'))
 	else if(config.output_as=='csv')
-		console.log(utils.serialize(result, 'csv', {'csv_sep':config.csv_seperator}))
+		console.log(utils.serialize(data, 'csv', {'csv_sep':config.csv_seperator}))
 	else
-		console.log(utils.serialize(result, 'table', {'colors':['yellow', null]}))
+		console.log(utils.serialize(data, 'table', {'colors':['yellow', null, null, 'cyan']}))
 	
 
 }
