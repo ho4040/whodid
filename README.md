@@ -115,7 +115,7 @@ most of option can be predefined in `whodid.json`.
 			".+/node_modules/.+",
 			".+/__libs__/.+"
 	],
-	"line_accept_num":1000, 
+	"line_accept_max":1000, 
 	"output_as":"csv", // table or csv or json
 	"csv_seperator":", ", // you can speicify seperator
 }
