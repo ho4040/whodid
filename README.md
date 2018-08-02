@@ -116,8 +116,8 @@ most of option can be predefined in `whodid.json`.
 			".+/__libs__/.+"
 	],
 	"line_accept_max":1000, 
-	"output_as":"csv", // table or csv or json
-	"csv_seperator":", ", // you can speicify seperator
+	"output_as":"csv", 
+	"csv_seperator":", ",
 }
 ```
 
