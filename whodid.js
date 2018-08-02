@@ -64,7 +64,8 @@ function load_detail(commit_hash){
 			let ignore_regexp = config.ignore.find(re=>{ return !!filename.match(RegExp(re, 'g'))  })
 			
 			if(!!ignore_regexp) {
-				storage.ignored.push({filename : filename, reason:{type:'regexp', target:ignore_regexp}})
+				storage.ignored.push({filename : filename, reason:"ignore regexp matched with filename"})
+				return
 			}
 
 			storage.modifications.push({

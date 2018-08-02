@@ -11,7 +11,7 @@ let whodid_history 	= require('./whodid-history.js')
 let whodid_debug 	= require('./whodid-debug.js')
 let to_snake_case 	= require('lodash.snakecase')
 
-argv.version('1.1.0');
+argv.version('1.1.1');
 
 function make_extra_option(options){
 	return [
