@@ -27,7 +27,9 @@ function get_commits(include_detail=true, verbose=false){
 		console.log(cmd)
 	
 	let result = execSync(cmd, {cwd:config.cwd}).toString()
-	var items = result.split("\n").map(e=>{
+	var items = result.split("\n").filter(e=>{
+		return (!!e && e.length > 20)
+	}).map(e=>{
 		let items = e.split("||")
 		let date = items[0]
 		let author = items[1]
@@ -43,6 +45,11 @@ function get_commits(include_detail=true, verbose=false){
 			return Object.assign(commit, load_detail(commit.hash))
 		})
 	}
+
+	if(config.verbose && items.length == 0)
+		console.log("empty result")
+
+
 	return items
 }
 
@@ -70,7 +77,7 @@ function load_detail(commit_hash){
 
 			storage.modifications.push({
 				filename : filename,
-				edit_line_num : parseInt(modification_matched[2]) < parseInt(config.line_accept_max) ? parseInt(modification_matched[2]) : 0,
+				edit_line_num : parseInt(modification_matched[2]) < parseInt(config.line_accept_max) ? parseInt(modification_matched[2]) : 1,
 				insert_ratio : modification_matched[3].length / (modification_matched[4] + modification_matched[3]).length,
 				remove_ratio : modification_matched[4].length / (modification_matched[4] + modification_matched[3]).length
 			})

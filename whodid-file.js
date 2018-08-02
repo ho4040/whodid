@@ -30,15 +30,19 @@ function run(commits){
 	if(config.num > 0)
 		arr.length = config.num
 
-	if(config.as_json){
-		console.log(JSON.stringify(arr))
-	}else{
-		let table = new Table({head:['weight', 'top modified file']})
-		arr.forEach(info=>{
-			table.push([info.weight, info.filename])
-		})
-		console.log(table.toString())
-	}
+	let data = [['weight', 'top modified file']]
+	arr.forEach(info=>{
+		data.push([info.weight, info.filename])
+	})
+
+	if(config.output_as=='json')
+		console.log(utils.serialize(data, 'json'))
+	else if(config.output_as=='csv')
+		console.log(utils.serialize(data, 'csv', {'csv_sep':config.csv_seperator}))
+	else
+		console.log(utils.serialize(data, 'table', {'colors':['yellow']}))
+
+
 }
 
 module.exports = {run}

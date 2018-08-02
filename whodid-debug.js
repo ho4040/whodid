@@ -5,22 +5,30 @@ const utils = require('./utils.js')
 
 function run(commit_hash) {
 
-	let table = new Table({head:['state', 'file', 'evaluate'], style:{'head':['white', 'white', 'white']}})
-	console.log("Debug commit: ", utils.cyan(commit_hash))
+	let config = whodid_config.retrieve()
 	let commit = whodid_base.load_detail(commit_hash)
-	let total = 0
-	
+
+	let result = [['state', 'filename', 'evaluate result']]
 	commit.modifications.forEach(e=>{
-		table.push([utils.green('accepted'), e.filename, `${e.edit_line_num} line accepted` ])
+		result.push(['accept', e.filename, `${e.edit_line_num} line accepted`])
 	})
-	
 	commit.ignored.forEach(e=>{
-		table.push([utils.red('rejected'), e.filename, e.reason])
+		result.push(['reject', e.filename, e.reason])
 	})
 
-	console.log(table.toString())
-	commit.modifications.forEach(e=>{ total += e.edit_line_num})
-	console.log("total accepted line:", utils.yellow(total))
+	if(config.output_as=='json')
+		console.log(utils.serialize(result, 'json'))
+	else if(config.output_as=='csv')
+		console.log(utils.serialize(result, 'csv', {'csv_sep':config.csv_seperator}))
+	else
+		console.log(utils.serialize(result, 'table', {'colors':[function(state){
+			if(state=='accept')
+				return utils.green(state)
+			else
+				return utils.red(state)
+		}]}))
+
+
 	return
 }
 

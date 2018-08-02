@@ -44,28 +44,46 @@ $ whodid author --cwd=<your-project-path> --since=1.month
 $ whodid file --verbose=false --cwd=<your-project-path> --since=1.month
 ```
 
-#### check what is most heavy commit of each author
+#### Check what is most heavy commit of each author
 
 ```bash
 $ whodid heavy --cwd=<your-project-path> --since=1.month
 ```
 
-you can make it quiet with verbose flag
+you can make it quiet or not with verbose flag
 
 ```bash
 $ whodid author --cwd=<your-project-path> --since=1.month --verbose=false
 ```
 
-
-#### json result
-
-you can get json output with `--as-json` option
+### Check working history
 
 ```bash
-$ whodid --cwd=./ --as_json=true
+$ whodid history --since=1.month --author="sally"
 ```
 
-#### you can check another options in help command.
+
+#### JSON or CSV result
+
+you can get json output with `--output-as` option
+
+```bash
+$ whodid --cwd=./ --output-as=json
+```
+
+or
+
+```bash
+$ whodid --cwd=./ --output-as=csv --csv-seprator="|"
+```
+
+### Check evaluation process more precisely
+
+```bash
+$  whodid debug --commit=a1b2c3d
+```
+
+#### Check another options in help command.
 
 ```bash
 $ whodid --help
@@ -75,7 +93,7 @@ $ whodid --help
 #### Default action
 
 ```bash
-$ whodid --cwd=./ --since=1.month --verbose=false --include-merge=false  --line-accept-max=1000
+$ whodid --cwd=./ --since=1.month --verbose --include-merge=false  --line-accept-max=1000
 ```
 is same as
 
@@ -84,11 +102,10 @@ $ whodid
 ```
 
 
-# Make exceptions
+# Setting with config file
 
-To avoid counting of external library files or image files in commit, 
+most of option can be predefined in `whodid.json`.
 
-Specify Regexp on `whodid.json` and make this file place in your project directory.
 
 ```json
 {
@@ -98,6 +115,15 @@ Specify Regexp on `whodid.json` and make this file place in your project directo
 			".+/node_modules/.+",
 			".+/__libs__/.+"
 	],
-	"line_accept_num":1000
+	"line_accept_num":1000, 
+	"output_as":"csv", // table or csv or json
+	"csv_seperator":", ", // you can speicify seperator
 }
 ```
+
+
+# ignore file speicification
+
+To avoid counting of external library files or image files in commit, 
+
+Specify Regexp on `whodid.json` and make this file place in your project directory.

@@ -11,7 +11,7 @@ let whodid_history 	= require('./whodid-history.js')
 let whodid_debug 	= require('./whodid-debug.js')
 let to_snake_case 	= require('lodash.snakecase')
 
-argv.version('1.1.1');
+argv.version('1.1.2');
 
 function make_extra_option(options){
 	return [
@@ -19,42 +19,52 @@ function make_extra_option(options){
 			name:"verbose",
 			type:"boolean",
 			description:"show process or not (default:false)",
-			example:"'whodid author --verbose=false"
+			example:"whodid author --verbose"
 		},{
 			name:"cwd",
 			type:"string",
 			description:"the specification git project cwd.(default: './')",
-			example:"'whodid author --cwd=/home/ubuntu/someProj"
+			example:"whodid author --cwd=/home/ubuntu/someProj"
 		},{
 			name:"since",
 			type:"string",
 			description:"counting start day. (deafult:2.month)",
-			example:"'whodid author --since=2.month"
+			example:"whodid author --since=2.month"
 		},{
 			name:"until",
 			type:"string",
 			description:"counting end day. (deafult:now)",
-			example:"'whodid author --until=now"
+			example:"whodid author --until=now"
 		},{
 			name:"include-merge",
 			type:"boolean",
 			description:"specify include merge commit or not.(default: false)",
-			example:"'whodid author --include-merge=true"
+			example:"whodid author --include-merge=true"
 		},{
 			name:"line-accept-max",
 			type:"integer",
 			description:"set acceptable limit of modified line number",
-			example:"'whodid author --line-accept-max=10000"
+			example:"whodid author --line-accept-max=10000"
 		},{
-			name:"as-json",
-			type:"boolean",
-			description:"print as json (default:false)",
-			example:"'whodid author --as-json=true"
+			name:"output-as",
+			type:"string",
+			description:"output type <table|json|csv> (default:table) csv requires --csv-seperator=<seperator> option also",
+			example:"whodid author --output-as=table"
+		},{
+			name:"csv-seperator",
+			type:"string",
+			description:"csv seperator",
+			example:"whodid author --output-as=table"
 		},{
 			name:"num",
 			type:"integer",
 			description:"number of result",
-			example:"'whodid heavy --since=2.month --num=10"
+			example:"whodid heavy --since=2.month --num=10"
+		},{
+			name:"author",
+			type:"string",
+			description:"show only specific author",
+			example:"whodid heavy --author='zero <zero@nooslab.com>'"
 		}
 	].concat(options)
 }
@@ -100,12 +110,7 @@ argv.mod({
 		"\twhodid heavy --path=~/someProj --since=1.month",
 		"\twhodid heavy --path=~/someProj --author='zero <zero@nooslab.com>'",
 	].join(os.EOL),
-	options:make_extra_option([{
-			name:"author",
-			type:"string",
-			description:"show only specific author",
-			example:"'whodid heavy --author='zero <zero@nooslab.com>'"
-		}])
+	options:make_extra_option([])
 });
 
 argv.mod({
@@ -119,7 +124,7 @@ argv.mod({
 			name:"commit",
 			type:"string",
 			description:"commit hash",
-			example:"'whodid debug --commit=a1b2c3d"
+			example:"whodid debug --commit=a1b2c3d"
 		}])
 });
 
@@ -130,12 +135,7 @@ argv.mod({
 		"Examples:",
 		'\twhodid history --author="tom"',
 	].join(os.EOL),
-	options:make_extra_option([{
-			name:"author",
-			type:"string",
-			description:"show only specific author",
-			example:"'whodid heavy --author='zero <zero@nooslab.com>'"
-		}])
+	options:make_extra_option([])
 });
 
 

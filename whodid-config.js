@@ -1,5 +1,5 @@
 var fs = require('fs')
-
+var utils = require('./utils.js')
 var _m = {
 	config:{
 		cwd: "./",
@@ -8,7 +8,7 @@ var _m = {
 		verbose: false,
 		include_merge: false,
 		line_accept_max: 500,
-		as_json: false,
+		output_as: 'table',
 		num : 10,
 		ignore:[]
 	}
@@ -29,7 +29,7 @@ function load_from_file(config_filename, cwd){
 		console.log("config loaded from ", config_file_path)
 	}
 	else {
-		console.log('\x1b[31m%s\x1b[0m',"[WARN]can't find config file from ", config_file_path)
+		console.log(utils.red("[WARN]can't find config file from "+config_file_path))
 	}
 
 }

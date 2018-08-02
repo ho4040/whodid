@@ -22,31 +22,26 @@ function run(commits) {
 
 	commits.forEach(commit=>{ store(storage, commit) })
 
-	if(config.as_json){
-		console.log(JSON.stringify(storage))
-	}else{
+	var data = [['author', 'commit', 'line', 'subject']]
 
-		for(let author in storage){
-			console.log("\n Author: " + utils.green(author))
-			let table = new Table({
-				head:['commit', 'line', 'subject']
-			})
-
-			grouped_commits = storage[author]
-			grouped_commits = grouped_commits.sort((a, b)=>{
-				return b.score - a.score
-			})
-
-			grouped_commits.length = config.num
-
-			grouped_commits.forEach(e=>{
-				if(!!e.hash)
-					table.push([ utils.yellow(e.hash.substr(0,7)),  e.score.toFixed(0), e.subject ])
-				
-			})
-			console.log(table.toString())
-		}
+	for(let author in storage) {
+		grouped_commits = storage[author]
+		grouped_commits = grouped_commits.sort((a, b)=>{
+			return b.score - a.score
+		})
+		grouped_commits.length = config.num
+		grouped_commits.forEach(e=>{
+			if(!!e.hash)
+				data.push([ author, e.hash.substr(0,7),  e.score.toFixed(0), e.subject ])
+		})
 	}
+
+	if(config.output_as=='json')
+		console.log(utils.serialize(data, 'json'))
+	else if(config.output_as=='csv')
+		console.log(utils.serialize(data, 'csv', {'csv_sep':config.csv_seperator}))
+	else
+		console.log(utils.serialize(data, 'table', {'colors':[null, 'cyan', 'yellow']}))
 
 	return
 }
