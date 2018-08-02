@@ -7,9 +7,11 @@ let whodid_base 	= require('./whodid.js')
 let whodid_author 	= require('./whodid-author.js')
 let whodid_heavy 	= require('./whodid-heavy.js')
 let whodid_file 	= require('./whodid-file.js')
+let whodid_history 	= require('./whodid-history.js')
+let whodid_debug 	= require('./whodid-debug.js')
 let to_snake_case 	= require('lodash.snakecase')
 
-argv.version('v1.0.16');
+argv.version('1.1.0');
 
 function make_extra_option(options){
 	return [
@@ -121,6 +123,22 @@ argv.mod({
 		}])
 });
 
+argv.mod({
+	mod:'history',
+	description:[
+		"show commit scores each day",
+		"Examples:",
+		'\twhodid history --author="tom"',
+	].join(os.EOL),
+	options:make_extra_option([{
+			name:"author",
+			type:"string",
+			description:"show only specific author",
+			example:"'whodid heavy --author='zero <zero@nooslab.com>'"
+		}])
+});
+
+
 var args = argv.run();
 
 var opts = {}
@@ -146,10 +164,18 @@ switch(args.mod) {
 		whodid_heavy.run(commits)
 	}
 	break;
+
 	case "file":
 	{
 		let commits = whodid_base.get_commits()	
 		whodid_file.run(commits)
+	}
+	break;
+
+	case "history":
+	{
+		let commits = whodid_base.get_commits()	
+		whodid_history.run(commits)
 	}
 	break;
 
@@ -159,20 +185,7 @@ switch(args.mod) {
 		if(commit_hash == null)
 			console.log("commit option required")
 		else{
-			console.log("debug commit: ", commit_hash)
-			let commit = whodid_base.load_detail(commit_hash)
-			let total = 0
-			
-			commit.modifications.forEach(e=>{
-				console.log(`  [accept] ${e.edit_line_num} lines\t ${e.filename}`)
-			})
-			
-			commit.ignored.forEach(e=>{
-				console.log(`  [ignore] ${e.filename} by ${e.reason.type}`)
-			})
-
-			commit.modifications.forEach(e=>{ total += e.edit_line_num})
-			console.log("  total accepted line:", total)
+			whodid_debug.run(commit_hash)
 		}
 	}
 	break;
