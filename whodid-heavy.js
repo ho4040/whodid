@@ -1,6 +1,7 @@
 var whodid_config = require('./whodid-config.js')
 const Table = require('cli-table');
 const utils = require('./utils.js')
+var moment = require('moment')
 
 function store(storage, commit){
 	
@@ -22,7 +23,7 @@ function run(commits) {
 
 	commits.forEach(commit=>{ store(storage, commit) })
 
-	var data = [['author', 'commit', 'line', 'subject']]
+	var data = [['date', 'author', 'commit', 'line', 'subject']]
 
 	for(let author in storage) {
 		grouped_commits = storage[author]
@@ -31,8 +32,10 @@ function run(commits) {
 		})
 		grouped_commits.length = config.num
 		grouped_commits.forEach(e=>{
-			if(!!e.hash)
-				data.push([ author, e.hash.substr(0,7),  e.score.toFixed(0), e.subject ])
+			if(!!e.hash){
+				let d = moment(e.date, 'YYYY-MM-DD HH:mm Z').format('YYYY-MM-DD')
+				data.push([ d, author, e.hash.substr(0,7),  e.score.toFixed(0), e.subject ])
+			}
 		})
 	}
 
