@@ -22,7 +22,7 @@ $ npm install -g whodid
 
 # Usage
 
-befor run `whodid` you have to pull from git repository
+before run `whodid` you have to pull from git repository
 
 ```bash
 $ cd your-proj-dir
@@ -38,7 +38,7 @@ and then..
 $ whodid author --cwd=<your-project-path> --since=1.month
 ```
 
-#### check most modfied files
+#### check most modified files
 
 ```bash
 $ whodid file --verbose=false --cwd=<your-project-path> --since=1.month
@@ -74,7 +74,7 @@ $ whodid --cwd=./ --output-as=json
 or
 
 ```bash
-$ whodid --cwd=./ --output-as=csv --csv-seprator="|"
+$ whodid --cwd=./ --output-as=csv --csv-separator="|"
 ```
 
 ### Check evaluation process more precisely
@@ -117,12 +117,12 @@ most of option can be predefined in `whodid.json`.
 	],
 	"line_accept_max":1000, 
 	"output_as":"csv", 
-	"csv_seperator":", ",
+	"csv_separator":", ",
 }
 ```
 
 
-# ignore file speicification
+# ignore file specification
 
 To avoid counting of external library files or image files in commit, 
 
