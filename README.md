@@ -74,7 +74,7 @@ $ whodid --cwd=./ --output-as=json
 or
 
 ```bash
-$ whodid --cwd=./ --output-as=csv --csv-separator="|"
+$ whodid --cwd=./ --output-as=csv --csv-seperator="|"
 ```
 
 ### Check evaluation process more precisely
@@ -117,7 +117,7 @@ most of option can be predefined in `whodid.json`.
 	],
 	"line_accept_max":1000, 
 	"output_as":"csv", 
-	"csv_separator":", ",
+	"csv_seperator":", ",
 }
 ```
 
