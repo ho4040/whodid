@@ -28,12 +28,12 @@ function make_extra_option(options){
 		},{
 			name:"since",
 			type:"string",
-			description:"counting start day. (deafult:2.month)",
+			description:"counting start day. (default:2.month)",
 			example:"whodid author --since=2.month"
 		},{
 			name:"until",
 			type:"string",
-			description:"counting end day. (deafult:now)",
+			description:"counting end day. (default:now)",
 			example:"whodid author --until=now"
 		},{
 			name:"include-merge",
@@ -54,7 +54,7 @@ function make_extra_option(options){
 			name:"csv-seperator",
 			type:"string",
 			description:"csv seperator",
-			example:"whodid author --output-as=table"
+			example:"whodid author --csv-seperator=','"
 		},{
 			name:"num",
 			type:"integer",
