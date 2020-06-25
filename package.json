@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "argv": "git+https://github.com/ho4040/argv.git",
+    "argv": "^0.0.2",
     "cli-table": "^0.3.1",
     "lodash.snakecase": "^4.1.1",
     "moment": "^2.22.2"
