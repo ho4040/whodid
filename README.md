@@ -117,7 +117,7 @@ most of option can be predefined in `whodid.json`.
 	],
 	"line_accept_max":1000, 
 	"output_as":"csv", 
-	"csv_seperator":", ",
+	"csv_seperator":", "
 }
 ```
 
